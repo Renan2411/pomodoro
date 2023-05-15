@@ -1,8 +1,9 @@
-import { Button, ButtonGroup } from '@mui/material'
+import { Box, Button, ButtonGroup } from '@mui/material'
 import './index.css'
 import { useEffect, useState } from 'react'
-
-
+import Botao from '../botao'
+import FormModal from '../modal'
+import DeleteIcon from '@mui/icons-material/Delete';
 
 
 export default function Relogio() {
@@ -11,45 +12,61 @@ export default function Relogio() {
     const [segundos, setSegundos] = useState(0)
     const [ativarTimer, setAtivarTimer] = useState(false)
 
+    const [tempoPomodoro, setTempoPomodoro] = useState(25)
+    const [tempoShortBreak, setTempoShortBreak] = useState(5)
+    const [tempoLongBreak, setTempoLongBreak] = useState(15)
+
+   const [openModal, setOpenModal] = useState(false) 
+  
+
+    let timer;
 
     useEffect(() => {
         setPomodoro()
     }, [])
+ 
 
+    function abrirModal(){
+        setOpenModal(true)
+    }
 
     function setPomodoro() {
-        setMinutos(25)
-        setTempoTotal(25)
+        setMinutos(tempoPomodoro)
+        setTempoTotal(tempoPomodoro)
     }
 
     function setShortBreak() {
-        setMinutos(1)
-        setTempoTotal(1)
+        setMinutos(tempoShortBreak)
+        setTempoTotal(tempoShortBreak)
     }
 
     function setLongBreak() {
-        setMinutos(15)
-        setTempoTotal(15)
+        setMinutos(tempoLongBreak)
+        setTempoTotal(tempoLongBreak)
+    }
+
+    function handleClickButtonStart() {
+        // return ativarTimer ? iniciarTimer
     }
 
     function iniciarTimer() {
         setAtivarTimer(true)
     }
 
-    function botaoAtivo(time: any){
+    function pararTimer() {
+        clearInterval(timer)
+        setAtivarTimer(false)
+    }
+
+    function botaoAtivo(time: any) {
         return time == tempoTotal ? 'success' : 'primary'
     }
 
-    function formatarSegundos(segundos: any){
+    function formatarSegundos(segundos: any) {
         return segundos < 10 ? `0${segundos}` : segundos
     }
 
-    // function pararTimer(timer: any){
-    //     clearInterval(timer)
-    // }
     useEffect(() => {
-        let timer: any
-
         if (ativarTimer && minutos === 0 && segundos === 0) {
             setAtivarTimer(false)
         }
@@ -64,25 +81,35 @@ export default function Relogio() {
                 setSegundos(segundos => segundos - 1)
 
             }, 1000)
-        } 
+        }
+
 
         return () => clearInterval(timer)
+        // return () => pararTimer
     }, [ativarTimer, segundos])
 
     return (
-        <div className="flex flex-col justify-center justify-items-center items-center relogio bg-white-500" >
+        <div className="bg-gray-300 p-3 flex flex-col justify-center justify-items-center items-center relogio bg-white-500" >
 
             <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                <Button color={botaoAtivo(25)}  onClick={setPomodoro}>Pomodoro</Button>
-                <Button color={botaoAtivo(1)} onClick={setShortBreak}>Short Break</Button>
-                <Button color={botaoAtivo(15)} onClick={setLongBreak}>Long Break</Button>
+                <Botao cor={botaoAtivo(25)} eventClick={setPomodoro} label={"Pomodo"}></Botao>
+                <Botao cor={botaoAtivo(1)} eventClick={setShortBreak} label={"Short Break"}></Botao>
+                <Botao cor={botaoAtivo(15)} eventClick={setLongBreak} label={"Long Break"}></Botao>
             </ButtonGroup>
 
-            <span className="timer">{minutos}:{formatarSegundos(segundos)}</span>
-            {/* <span className="timer">{timer}</span> */}
+            <Button onClick={abrirModal}>Open modal</Button>
 
 
-            <Button className='w-56' variant="outlined" onClick={iniciarTimer}>{ativarTimer ? 'Stop' : 'Start'}</Button>
+            <svg data-testid="DeleteIcon"></svg>
+
+
+            <span className="timer text-white">{minutos}:{formatarSegundos(segundos)}</span>
+
+            <Botao classe='w-56 bg-white' eventClick={ativarTimer ? pararTimer : iniciarTimer} label={ativarTimer ? 'Stop' : 'Start'}></Botao>
+
+            
+            <FormModal open={openModal} eventClose={setOpenModal}></FormModal>
+
 
         </div>
     )
